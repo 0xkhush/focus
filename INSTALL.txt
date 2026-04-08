@@ -1,0 +1,196 @@
+================================================================================
+    YOUTUBE CONTENT FILTER - CHROME EXTENSION
+    Quick Installation Guide
+================================================================================
+
+🎯 PURPOSE:
+Block non-constructive YouTube videos (gaming, vlogs, pranks, etc.)
+Allow only: Education, Music, Study, News, Science & Technology
+
+================================================================================
+📦 INSTALLATION STEPS:
+================================================================================
+
+STEP 1: Generate Icon Files
+----------------------------
+1. Open "generate-icons.html" in your web browser
+2. Click "Generate Icons" button
+3. Right-click each icon and "Save image as..."
+4. Save as: icon16.png, icon48.png, icon128.png
+5. Place all 3 PNG files in the "YOUTUBE EXTENSION" folder
+
+STEP 2: Load Extension in Chrome
+---------------------------------
+1. Open Chrome browser
+2. Go to: chrome://extensions/
+3. Enable "Developer mode" (toggle in top-right)
+4. Click "Load unpacked" button
+5. Select the "YOUTUBE EXTENSION" folder
+6. Extension icon should appear in toolbar ✅
+
+STEP 3: Test the Extension
+---------------------------
+1. Open "test.html" in your browser for test video links
+2. Visit YouTube and search for:
+   - Educational video → Should PLAY ✅
+   - Gaming/vlog video → Should BLOCK 🚫
+3. Click extension icon to see statistics
+
+================================================================================
+🔑 API KEY INFORMATION:
+================================================================================
+
+Pre-configured API Key: AIzaSyARJx_NHCMpVXm0Z7iOE-w1MyrbD8BmzO4
+Service: YouTube Data API v3
+Quota: 10,000 units/day (free tier)
+
+If you need your own key:
+1. Go to: https://console.cloud.google.com/
+2. Create new project
+3. Enable "YouTube Data API v3"
+4. Create API Key
+5. Edit "background.js" and replace API_KEY value
+
+================================================================================
+📁 FILE STRUCTURE:
+================================================================================
+
+✅ manifest.json          - Extension configuration
+✅ background.js          - API logic & video checking
+✅ content.js            - YouTube page interaction
+✅ popup.html            - Extension popup interface
+✅ popup.js              - Popup functionality
+✅ icon.svg              - Icon template
+📝 README.md             - Full documentation
+📝 QUICK_START.md        - 5-minute guide
+🧪 test.html             - Testing page
+🎨 generate-icons.html   - Icon generator
+
+REQUIRED (you must create):
+🔴 icon16.png            - 16x16 icon
+🔴 icon48.png            - 48x48 icon
+🔴 icon128.png           - 128x128 icon
+
+================================================================================
+✅ ALLOWED CONTENT:
+================================================================================
+
+✓ Education & Tutorials (Category 27)
+✓ Music & Instrumental (Category 10)
+✓ News & Politics (Category 25)
+✓ Science & Technology (Category 28)
+✓ Keywords: tutorial, learn, study, lecture, documentary, etc.
+
+================================================================================
+🚫 BLOCKED CONTENT:
+================================================================================
+
+✗ Gaming & Gameplay (Category 20)
+✗ Vlogs & Daily content
+✗ Pranks & Challenges
+✗ Reaction videos
+✗ Entertainment/Comedy
+✗ Keywords: gaming, vlog, prank, meme, etc.
+
+================================================================================
+🎮 USING THE EXTENSION:
+================================================================================
+
+Toggle Filter:
+- Click extension icon
+- Use toggle switch to enable/disable
+- Reload YouTube tabs after changing
+
+View Statistics:
+- Click extension icon
+- See "Videos Blocked" and "Videos Allowed" counts
+
+When Video is Blocked:
+- Black overlay appears on video
+- Shows blocking reason
+- Video cannot be played
+- Navigate to different video
+
+================================================================================
+🔧 TROUBLESHOOTING:
+================================================================================
+
+Problem: Extension not showing in toolbar
+Solution: Reload extension at chrome://extensions/
+
+Problem: Videos not being blocked
+Solution:
+  - Check filter is enabled (extension popup)
+  - Refresh YouTube page
+  - Check console for errors (F12)
+
+Problem: "API quota exceeded" error
+Solution:
+  - Wait 24 hours for quota reset
+  - OR get your own API key (see above)
+
+Problem: Icons not displaying
+Solution:
+  - Generate all 3 PNG files using generate-icons.html
+  - Verify filenames are exact: icon16.png, icon48.png, icon128.png
+  - Reload extension
+
+================================================================================
+📊 STATISTICS & PRIVACY:
+================================================================================
+
+Data Stored Locally:
+- Filter enabled/disabled state
+- Count of blocked videos
+- Count of allowed videos
+
+Data Sent:
+- Video IDs to YouTube Data API (official Google service)
+- No personal data collected or sent anywhere
+
+Permissions Required:
+- Storage: Save preferences
+- Tabs: Detect YouTube navigation
+- youtube.com: Run content script
+- googleapis.com: Check videos via API
+
+================================================================================
+🎨 CUSTOMIZATION:
+================================================================================
+
+To adjust filtering rules, edit background.js:
+
+1. Change allowed categories (line 58):
+   const allowedCategories = ['10', '27', '25', '28'];
+
+2. Add constructive keywords (line 63):
+   constructiveKeywords = ['your', 'keywords', 'here'];
+
+3. Add non-constructive keywords (line 78):
+   nonConstructiveKeywords = ['block', 'these', 'terms'];
+
+After editing, reload extension at chrome://extensions/
+
+================================================================================
+📝 ADDITIONAL RESOURCES:
+================================================================================
+
+Full Documentation: README.md
+Quick Start: QUICK_START.md
+Test Page: test.html
+Icon Generator: generate-icons.html
+
+YouTube Category IDs:
+https://developers.google.com/youtube/v3/docs/videoCategories/list
+
+YouTube Data API Documentation:
+https://developers.google.com/youtube/v3
+
+================================================================================
+✨ ENJOY FOCUSED, CONSTRUCTIVE YOUTUBE BROWSING! ✨
+================================================================================
+
+Version: 1.0
+Last Updated: 2024
+
+For issues or questions, refer to README.md or check browser console (F12)

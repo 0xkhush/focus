@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>YouTube Content Filter</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                width: 400px;
+                min-height: 520px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+                background: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+                color: #ffffff;
+                overflow-x: hidden;
+            }
+
+            /* Header */
+            .header {
+                background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+                padding: 20px;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+                animation: shimmer 3s infinite;
+            }
+
+            @keyframes shimmer {
+                0%, 100% { transform: rotate(0deg); }
+                50% { transform: rotate(180deg); }
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                position: relative;
+                z-index: 1;
+            }
+
+            .logo-icon {
+                width: 48px;
+                height: 48px;
+                background: rgba(255,255,255,0.2);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+                backdrop-filter: blur(10px);
+            }
+
+            .logo-text h1 {
+                font-size: 22px;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+            }
+
+            .logo-text p {
+                font-size: 11px;
+                opacity: 0.9;
+                margin-top: 2px;
+            }
+
+            /* Main Container */
+            .container {
+                padding: 20px;
+            }
+
+            /* Status Card */
+            .status-card {
+                background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 16px;
+                padding: 20px;
+                margin-bottom: 16px;
+                backdrop-filter: blur(10px);
+            }
+
+            .status-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 16px;
+            }
+
+            .status-indicator {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .status-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #4ade80;
+                box-shadow: 0 0 12px rgba(74, 222, 128, 0.6);
+                animation: pulse 2s infinite;
+            }
+
+            .status-dot.inactive {
+                background: #f87171;
+                box-shadow: 0 0 12px rgba(248, 113, 113, 0.6);
+                animation: none;
+            }
+
+            @keyframes pulse {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: 0.7; transform: scale(1.1); }
+            }
+
+            .status-label {
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            /* Toggle Switch */
+            .toggle-switch {
+                position: relative;
+                width: 52px;
+                height: 28px;
+            }
+
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .toggle-slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255,255,255,0.2);
+                transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border-radius: 28px;
+            }
+
+            .toggle-slider:before {
+                position: absolute;
+                content: "";
+                height: 22px;
+                width: 22px;
+                left: 3px;
+                bottom: 3px;
+                background: white;
+                transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                border-radius: 50%;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            }
+
+            input:checked + .toggle-slider {
+                background: linear-gradient(135deg, #4ade80, #22c55e);
+            }
+
+            input:checked + .toggle-slider:before {
+                transform: translateX(24px);
+            }
+
+            /* Stats Grid */
+            .stats-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .stat-card {
+                background: rgba(255,255,255,0.05);
+                border-radius: 12px;
+                padding: 16px;
+                text-align: center;
+                border: 1px solid rgba(255,255,255,0.08);
+                transition: transform 0.2s, background 0.2s;
+            }
+
+            .stat-card:hover {
+                transform: translateY(-2px);
+                background: rgba(255,255,255,0.08);
+            }
+
+            .stat-card.blocked {
+                border-left: 3px solid #f87171;
+            }
+
+            .stat-card.allowed {
+                border-left: 3px solid #4ade80;
+            }
+
+            .stat-number {
+                font-size: 32px;
+                font-weight: 700;
+                background: linear-gradient(135deg, #ffffff, #a0a0a0);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .stat-label {
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                opacity: 0.7;
+                margin-top: 4px;
+            }
+
+            /* Section */
+            .section {
+                margin-bottom: 16px;
+            }
+
+            .section-title {
+                font-size: 13px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                opacity: 0.6;
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            /* Categories */
+            .categories-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .category-item {
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 10px;
+                padding: 10px 12px;
+                font-size: 12px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.2s;
+            }
+
+            .category-item:hover {
+                background: rgba(255,255,255,0.1);
+                transform: translateX(4px);
+            }
+
+            .category-icon {
+                font-size: 16px;
+            }
+
+            /* Learning Section */
+            .learning-card {
+                background: linear-gradient(145deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
+                border: 1px solid rgba(139, 92, 246, 0.3);
+                border-radius: 16px;
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .learning-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 12px;
+            }
+
+            .learning-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .learning-icon {
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+            }
+
+            .learning-text h3 {
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            .learning-text p {
+                font-size: 12px;
+                opacity: 0.7;
+            }
+
+            .learning-count {
+                font-size: 28px;
+                font-weight: 700;
+                color: #a78bfa;
+            }
+
+            /* Buttons */
+            .btn-group {
+                display: flex;
+                gap: 8px;
+            }
+
+            .btn {
+                flex: 1;
+                padding: 12px 16px;
+                border: none;
+                border-radius: 10px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #3b82f6, #2563eb);
+                color: white;
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            }
+
+            .btn-danger {
+                background: rgba(239, 68, 68, 0.2);
+                color: #f87171;
+                border: 1px solid rgba(239, 68, 68, 0.3);
+            }
+
+            .btn-danger:hover {
+                background: rgba(239, 68, 68, 0.3);
+            }
+
+            /* Footer */
+            .footer {
+                text-align: center;
+                padding: 12px;
+                font-size: 10px;
+                opacity: 0.5;
+                border-top: 1px solid rgba(255,255,255,0.05);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .footer-text {
+                flex: 1;
+            }
+
+            .settings-btn {
+                background: rgba(255,255,255,0.1);
+                border: none;
+                color: rgba(255,255,255,0.7);
+                padding: 6px 10px;
+                border-radius: 6px;
+                font-size: 10px;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .settings-btn:hover {
+                background: rgba(255,255,255,0.2);
+                color: white;
+            }
+
+            /* API Key Warning */
+            .api-warning {
+                display: none;
+                background: linear-gradient(145deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.1));
+                border: 1px solid rgba(251, 191, 36, 0.3);
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 16px;
+                text-align: center;
+            }
+
+            .api-warning.show {
+                display: block;
+            }
+
+            .api-warning-icon {
+                font-size: 32px;
+                margin-bottom: 8px;
+            }
+
+            .api-warning-title {
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 6px;
+                color: #fbbf24;
+            }
+
+            .api-warning-text {
+                font-size: 12px;
+                opacity: 0.8;
+                margin-bottom: 12px;
+            }
+
+            .api-warning-btn {
+                background: linear-gradient(135deg, #f59e0b, #d97706);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .api-warning-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+            }
+
+            /* Main content hidden when no API key */
+            .main-content {
+                display: block;
+            }
+
+            .main-content.hidden {
+                display: none;
+            }
+
+            /* Modal Overlay */
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 1000;
+                animation: fadeIn 0.2s ease;
+            }
+
+            .modal-overlay.active {
+                display: block;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            .modal {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 90%;
+                max-height: 85%;
+                background: linear-gradient(145deg, #1a1a2e, #16213e);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                overflow: hidden;
+                animation: slideUp 0.3s ease;
+            }
+
+            @keyframes slideUp {
+                from { transform: translate(-50%, -40%); opacity: 0; }
+                to { transform: translate(-50%, -50%); opacity: 1; }
+            }
+
+            .modal-header {
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(139, 92, 246, 0.1));
+                padding: 16px 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+
+            .modal-title {
+                font-size: 16px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .modal-close {
+                width: 32px;
+                height: 32px;
+                border: none;
+                background: rgba(255,255,255,0.1);
+                color: white;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.2s;
+            }
+
+            .modal-close:hover {
+                background: rgba(255,255,255,0.2);
+            }
+
+            .modal-body {
+                padding: 16px;
+                max-height: 350px;
+                overflow-y: auto;
+            }
+
+            .modal-body::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .modal-body::-webkit-scrollbar-track {
+                background: rgba(255,255,255,0.05);
+                border-radius: 3px;
+            }
+
+            .modal-body::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,0.2);
+                border-radius: 3px;
+            }
+
+            /* Channel Tabs */
+            .channel-tabs {
+                display: flex;
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+
+            .channel-tab {
+                flex: 1;
+                padding: 10px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 10px;
+                color: white;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                text-align: center;
+            }
+
+            .channel-tab.active {
+                background: rgba(139, 92, 246, 0.3);
+                border-color: rgba(139, 92, 246, 0.5);
+            }
+
+            .channel-tab:hover:not(.active) {
+                background: rgba(255,255,255,0.1);
+            }
+
+            .tab-count {
+                display: inline-block;
+                background: rgba(255,255,255,0.2);
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-size: 10px;
+                margin-left: 4px;
+            }
+
+            /* Channel List */
+            .channel-list {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .channel-item {
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 12px;
+                padding: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                transition: all 0.2s;
+            }
+
+            .channel-item:hover {
+                background: rgba(255,255,255,0.08);
+            }
+
+            .channel-item.allowed {
+                border-left: 3px solid #4ade80;
+            }
+
+            .channel-item.blocked {
+                border-left: 3px solid #f87171;
+            }
+
+            .channel-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex: 1;
+                min-width: 0;
+            }
+
+            .channel-avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                font-weight: 600;
+                flex-shrink: 0;
+            }
+
+            .channel-details {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .channel-name {
+                font-size: 13px;
+                font-weight: 600;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .channel-category {
+                font-size: 11px;
+                opacity: 0.6;
+                margin-top: 2px;
+            }
+
+            .channel-actions {
+                display: flex;
+                gap: 6px;
+            }
+
+            .channel-btn {
+                width: 32px;
+                height: 32px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+            }
+
+            .channel-btn.toggle-allow {
+                background: rgba(74, 222, 128, 0.2);
+                color: #4ade80;
+            }
+
+            .channel-btn.toggle-allow:hover {
+                background: rgba(74, 222, 128, 0.4);
+            }
+
+            .channel-btn.toggle-block {
+                background: rgba(248, 113, 113, 0.2);
+                color: #f87171;
+            }
+
+            .channel-btn.toggle-block:hover {
+                background: rgba(248, 113, 113, 0.4);
+            }
+
+            .channel-btn.delete {
+                background: rgba(255,255,255,0.1);
+                color: rgba(255,255,255,0.6);
+            }
+
+            .channel-btn.delete:hover {
+                background: rgba(239, 68, 68, 0.3);
+                color: #f87171;
+            }
+
+            /* Empty State */
+            .empty-state {
+                text-align: center;
+                padding: 40px 20px;
+                opacity: 0.6;
+            }
+
+            .empty-state-icon {
+                font-size: 48px;
+                margin-bottom: 12px;
+            }
+
+            .empty-state-text {
+                font-size: 14px;
+            }
+
+            .empty-state-subtext {
+                font-size: 12px;
+                opacity: 0.7;
+                margin-top: 4px;
+            }
+
+            /* Toast Notification */
+            .toast {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%) translateY(100px);
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                border: 1px solid rgba(255,255,255,0.1);
+                padding: 12px 24px;
+                border-radius: 12px;
+                font-size: 13px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                z-index: 2000;
+                opacity: 0;
+                transition: all 0.3s ease;
+            }
+
+            .toast.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+
+            .toast.success {
+                border-color: rgba(74, 222, 128, 0.3);
+            }
+
+            .toast.error {
+                border-color: rgba(248, 113, 113, 0.3);
+            }
+
+            /* Confirm Dialog */
+            .confirm-dialog {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 2000;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .confirm-dialog.active {
+                display: flex;
+            }
+
+            .confirm-box {
+                background: linear-gradient(145deg, #1a1a2e, #16213e);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 16px;
+                padding: 24px;
+                max-width: 300px;
+                text-align: center;
+            }
+
+            .confirm-icon {
+                font-size: 48px;
+                margin-bottom: 12px;
+            }
+
+            .confirm-title {
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+
+            .confirm-text {
+                font-size: 13px;
+                opacity: 0.7;
+                margin-bottom: 20px;
+            }
+
+            .confirm-buttons {
+                display: flex;
+                gap: 10px;
+            }
+
+            .confirm-btn {
+                flex: 1;
+                padding: 10px;
+                border: none;
+                border-radius: 10px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .confirm-btn.cancel {
+                background: rgba(255,255,255,0.1);
+                color: white;
+            }
+
+            .confirm-btn.confirm {
+                background: linear-gradient(135deg, #ef4444, #dc2626);
+                color: white;
+            }
+
+            .confirm-btn:hover {
+                transform: translateY(-2px);
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">YT</div>
+                <div class="logo-text">
+                    <h1>Content Filter</h1>
+                    <p>Smart YouTube Protection</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Container -->
+        <div class="container">
+            <!-- API Key Warning (shown when no API key) -->
+            <div class="api-warning" id="apiWarning">
+                <div class="api-warning-icon">KEY</div>
+                <div class="api-warning-title">API Key Required</div>
+                <div class="api-warning-text">Please configure your YouTube Data API key to use this extension.</div>
+                <button class="api-warning-btn" id="setupApiBtn">Setup API Key</button>
+            </div>
+
+            <!-- Main Content (hidden when no API key) -->
+            <div class="main-content" id="mainContent">
+                <!-- Status Card -->
+                <div class="status-card">
+                    <div class="status-header">
+                        <div class="status-indicator">
+                            <div class="status-dot" id="statusDot"></div>
+                            <span class="status-label" id="statusLabel">Filter Active</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enableToggle" checked />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card blocked">
+                            <div class="stat-number" id="blockedCount">0</div>
+                            <div class="stat-label">Blocked</div>
+                        </div>
+                        <div class="stat-card allowed">
+                            <div class="stat-number" id="allowedCount">0</div>
+                            <div class="stat-label">Allowed</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Section -->
+                <div class="learning-card">
+                    <div class="learning-header">
+                        <div class="learning-info">
+                            <div class="learning-icon">AI</div>
+                            <div class="learning-text">
+                                <h3>Smart Learning</h3>
+                                <p>Channels auto-cached for fast filtering</p>
+                            </div>
+                        </div>
+                        <div class="learning-count" id="learnedCount">0</div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="viewCacheBtn">
+                            <span>View Channels</span>
+                        </button>
+                        <button class="btn btn-danger" id="clearCacheBtn">
+                            <span>Clear</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Categories Section -->
+                <div class="section">
+                    <div class="section-title">
+                        <span>Allowed Content Types</span>
+                    </div>
+                    <div class="categories-grid">
+                        <div class="category-item">
+                            <span class="category-icon">GR</span>
+                            <span>Education</span>
+                        </div>
+                        <div class="category-item">
+                            <span class="category-icon">MU</span>
+                            <span>Music</span>
+                        </div>
+                        <div class="category-item">
+                            <span class="category-icon">BK</span>
+                            <span>Study</span>
+                        </div>
+                        <div class="category-item">
+                            <span class="category-icon">NW</span>
+                            <span>News</span>
+                        </div>
+                        <div class="category-item">
+                            <span class="category-icon">SC</span>
+                            <span>Science</span>
+                        </div>
+                        <div class="category-item">
+                            <span class="category-icon">TC</span>
+                            <span>Technology</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <span class="footer-text">YouTube Content Filter v1.0</span>
+            <button class="settings-btn" id="settingsBtn">
+                <span>Settings</span>
+            </button>
+        </div>
+
+        <!-- Channel Modal -->
+        <div class="modal-overlay" id="channelModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <span>Learned Channels</span>
+                    </div>
+                    <button class="modal-close" id="closeModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="channel-tabs">
+                        <button class="channel-tab active" data-filter="all">
+                            All <span class="tab-count" id="allCount">0</span>
+                        </button>
+                        <button class="channel-tab" data-filter="allowed">
+                            Allowed <span class="tab-count" id="allowedTabCount">0</span>
+                        </button>
+                        <button class="channel-tab" data-filter="blocked">
+                            Blocked <span class="tab-count" id="blockedTabCount">0</span>
+                        </button>
+                    </div>
+                    <div class="channel-list" id="channelList">
+                        <!-- Channels will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirm Dialog -->
+        <div class="confirm-dialog" id="confirmDialog">
+            <div class="confirm-box">
+                <div class="confirm-icon">!</div>
+                <div class="confirm-title">Clear All Channels?</div>
+                <div class="confirm-text">This will remove all learned channels. The extension will need to re-learn from the API.</div>
+                <div class="confirm-buttons">
+                    <button class="confirm-btn cancel" id="confirmCancel">Cancel</button>
+                    <button class="confirm-btn confirm" id="confirmClear">Clear All</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div class="toast" id="toast">
+            <span id="toastIcon"></span>
+            <span id="toastMessage"></span>
+        </div>
+
+        <script src="popup.js"></script>
+    </body>
+</html>

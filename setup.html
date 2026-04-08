@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>YouTube Content Filter - Setup</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                width: 420px;
+                min-height: 600px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+                background: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+                color: #ffffff;
+                overflow-x: hidden;
+            }
+
+            /* Header */
+            .header {
+                background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+                padding: 24px 20px;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+                animation: shimmer 3s infinite;
+            }
+
+            @keyframes shimmer {
+                0%, 100% { transform: rotate(0deg); }
+                50% { transform: rotate(180deg); }
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                position: relative;
+                z-index: 1;
+            }
+
+            .logo-icon {
+                width: 56px;
+                height: 56px;
+                background: rgba(255,255,255,0.2);
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+                font-weight: 700;
+                backdrop-filter: blur(10px);
+            }
+
+            .logo-text h1 {
+                font-size: 22px;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+            }
+
+            .logo-text p {
+                font-size: 12px;
+                opacity: 0.9;
+                margin-top: 2px;
+            }
+
+            /* Container */
+            .container {
+                padding: 20px;
+            }
+
+            /* Welcome Card */
+            .welcome-card {
+                background: linear-gradient(145deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
+                border: 1px solid rgba(139, 92, 246, 0.3);
+                border-radius: 16px;
+                padding: 20px;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .welcome-icon {
+                font-size: 48px;
+                margin-bottom: 12px;
+            }
+
+            .welcome-title {
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+
+            .welcome-text {
+                font-size: 13px;
+                opacity: 0.8;
+                line-height: 1.5;
+            }
+
+            /* Section */
+            .section {
+                margin-bottom: 20px;
+            }
+
+            .section-title {
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #a78bfa;
+            }
+
+            .section-title .step-num {
+                width: 24px;
+                height: 24px;
+                background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: 700;
+            }
+
+            /* Instructions Card */
+            .instructions-card {
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .instruction-step {
+                display: flex;
+                gap: 12px;
+                margin-bottom: 14px;
+                padding-bottom: 14px;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+            }
+
+            .instruction-step:last-child {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
+            }
+
+            .step-number {
+                width: 28px;
+                height: 28px;
+                background: rgba(139, 92, 246, 0.3);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 13px;
+                font-weight: 700;
+                color: #a78bfa;
+                flex-shrink: 0;
+            }
+
+            .step-content {
+                flex: 1;
+            }
+
+            .step-title {
+                font-size: 13px;
+                font-weight: 600;
+                margin-bottom: 4px;
+            }
+
+            .step-desc {
+                font-size: 12px;
+                opacity: 0.7;
+                line-height: 1.4;
+            }
+
+            .step-link {
+                color: #60a5fa;
+                text-decoration: none;
+                font-weight: 500;
+            }
+
+            .step-link:hover {
+                text-decoration: underline;
+            }
+
+            /* Collapsible Instructions */
+            .collapsible-header {
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 12px;
+                padding: 14px 16px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                cursor: pointer;
+                transition: all 0.2s;
+                margin-bottom: 12px;
+            }
+
+            .collapsible-header:hover {
+                background: rgba(255,255,255,0.08);
+            }
+
+            .collapsible-header.active {
+                border-radius: 12px 12px 0 0;
+                margin-bottom: 0;
+                border-bottom: none;
+            }
+
+            .collapsible-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            .collapsible-icon {
+                font-size: 18px;
+                transition: transform 0.3s;
+            }
+
+            .collapsible-header.active .collapsible-icon {
+                transform: rotate(180deg);
+            }
+
+            .collapsible-content {
+                display: none;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-top: none;
+                border-radius: 0 0 12px 12px;
+                padding: 16px;
+                margin-bottom: 12px;
+            }
+
+            .collapsible-content.active {
+                display: block;
+            }
+
+            /* Input Group */
+            .input-group {
+                margin-bottom: 16px;
+            }
+
+            .input-label {
+                display: block;
+                font-size: 13px;
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: rgba(255,255,255,0.9);
+            }
+
+            .input-wrapper {
+                position: relative;
+            }
+
+            .api-input {
+                width: 100%;
+                padding: 14px 16px;
+                padding-right: 48px;
+                background: rgba(255,255,255,0.08);
+                border: 2px solid rgba(255,255,255,0.1);
+                border-radius: 12px;
+                color: white;
+                font-size: 14px;
+                font-family: 'Monaco', 'Consolas', monospace;
+                transition: all 0.2s;
+            }
+
+            .api-input::placeholder {
+                color: rgba(255,255,255,0.4);
+            }
+
+            .api-input:focus {
+                outline: none;
+                border-color: #8b5cf6;
+                background: rgba(255,255,255,0.1);
+            }
+
+            .api-input.valid {
+                border-color: #4ade80;
+            }
+
+            .api-input.invalid {
+                border-color: #f87171;
+            }
+
+            .toggle-visibility {
+                position: absolute;
+                right: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                color: rgba(255,255,255,0.5);
+                cursor: pointer;
+                font-size: 18px;
+                padding: 4px;
+                transition: color 0.2s;
+            }
+
+            .toggle-visibility:hover {
+                color: rgba(255,255,255,0.8);
+            }
+
+            /* Validation Status */
+            .validation-status {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-top: 10px;
+                padding: 10px 14px;
+                border-radius: 8px;
+                font-size: 13px;
+                display: none;
+            }
+
+            .validation-status.show {
+                display: flex;
+            }
+
+            .validation-status.validating {
+                background: rgba(251, 191, 36, 0.1);
+                border: 1px solid rgba(251, 191, 36, 0.3);
+                color: #fbbf24;
+            }
+
+            .validation-status.success {
+                background: rgba(74, 222, 128, 0.1);
+                border: 1px solid rgba(74, 222, 128, 0.3);
+                color: #4ade80;
+            }
+
+            .validation-status.error {
+                background: rgba(248, 113, 113, 0.1);
+                border: 1px solid rgba(248, 113, 113, 0.3);
+                color: #f87171;
+            }
+
+            .spinner {
+                width: 16px;
+                height: 16px;
+                border: 2px solid transparent;
+                border-top-color: currentColor;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+            }
+
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+
+            /* Buttons */
+            .btn {
+                width: 100%;
+                padding: 14px 20px;
+                border: none;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                color: white;
+            }
+
+            .btn-primary:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+            }
+
+            .btn-primary:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .btn-secondary {
+                background: rgba(255,255,255,0.1);
+                color: white;
+                border: 1px solid rgba(255,255,255,0.2);
+                margin-top: 10px;
+            }
+
+            .btn-secondary:hover {
+                background: rgba(255,255,255,0.15);
+            }
+
+            /* Security Note */
+            .security-note {
+                background: rgba(74, 222, 128, 0.1);
+                border: 1px solid rgba(74, 222, 128, 0.2);
+                border-radius: 10px;
+                padding: 12px 14px;
+                margin-top: 16px;
+                display: flex;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .security-icon {
+                font-size: 18px;
+                flex-shrink: 0;
+            }
+
+            .security-text {
+                font-size: 11px;
+                opacity: 0.8;
+                line-height: 1.5;
+            }
+
+            /* Footer */
+            .footer {
+                text-align: center;
+                padding: 16px;
+                font-size: 11px;
+                opacity: 0.5;
+                border-top: 1px solid rgba(255,255,255,0.05);
+            }
+
+            /* Already configured state */
+            .configured-card {
+                background: linear-gradient(145deg, rgba(74, 222, 128, 0.2), rgba(74, 222, 128, 0.1));
+                border: 1px solid rgba(74, 222, 128, 0.3);
+                border-radius: 16px;
+                padding: 24px;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .configured-icon {
+                width: 64px;
+                height: 64px;
+                background: linear-gradient(135deg, #4ade80, #22c55e);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 32px;
+                margin: 0 auto 16px;
+            }
+
+            .configured-title {
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+
+            .configured-text {
+                font-size: 13px;
+                opacity: 0.8;
+                margin-bottom: 20px;
+            }
+
+            .api-key-display {
+                background: rgba(0,0,0,0.2);
+                padding: 10px 14px;
+                border-radius: 8px;
+                font-family: 'Monaco', 'Consolas', monospace;
+                font-size: 12px;
+                margin-bottom: 16px;
+                word-break: break-all;
+            }
+
+            .btn-group {
+                display: flex;
+                gap: 10px;
+            }
+
+            .btn-group .btn {
+                flex: 1;
+            }
+
+            .btn-danger {
+                background: rgba(239, 68, 68, 0.2);
+                color: #f87171;
+                border: 1px solid rgba(239, 68, 68, 0.3);
+            }
+
+            .btn-danger:hover {
+                background: rgba(239, 68, 68, 0.3);
+            }
+
+            .btn-success {
+                background: linear-gradient(135deg, #4ade80, #22c55e);
+                color: white;
+            }
+
+            .btn-success:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 16px rgba(74, 222, 128, 0.4);
+            }
+
+            /* Hidden by default */
+            .setup-view, .configured-view {
+                display: none;
+            }
+
+            .setup-view.active, .configured-view.active {
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">YT</div>
+                <div class="logo-text">
+                    <h1>Content Filter</h1>
+                    <p>Initial Setup</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container -->
+        <div class="container">
+            <!-- Setup View (when no API key) -->
+            <div class="setup-view" id="setupView">
+                <!-- Welcome Card -->
+                <div class="welcome-card">
+                    <div class="welcome-icon">KEY</div>
+                    <div class="welcome-title">API Key Required</div>
+                    <div class="welcome-text">
+                        To analyze YouTube videos, this extension needs your personal YouTube Data API key. 
+                        Follow the instructions below to get one for free.
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="section">
+                    <div class="collapsible-header" id="instructionsToggle">
+                        <div class="collapsible-title">
+                            <span>?</span>
+                            <span>How to Get Your API Key</span>
+                        </div>
+                        <span class="collapsible-icon">V</span>
+                    </div>
+                    <div class="collapsible-content" id="instructionsContent">
+                        <div class="instruction-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <div class="step-title">Go to Google Cloud Console</div>
+                                <div class="step-desc">
+                                    Visit <a href="https://console.cloud.google.com/" target="_blank" class="step-link">console.cloud.google.com</a> and sign in with your Google account.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="instruction-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <div class="step-title">Create a New Project</div>
+                                <div class="step-desc">
+                                    Click "Select a project" at the top, then "New Project". Name it anything (e.g., "YouTube Filter").
+                                </div>
+                            </div>
+                        </div>
+                        <div class="instruction-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <div class="step-title">Enable YouTube Data API v3</div>
+                                <div class="step-desc">
+                                    Go to "APIs & Services" > "Library". Search for "YouTube Data API v3" and click "Enable".
+                                </div>
+                            </div>
+                        </div>
+                        <div class="instruction-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <div class="step-title">Create API Credentials</div>
+                                <div class="step-desc">
+                                    Go to "APIs & Services" > "Credentials". Click "Create Credentials" > "API Key".
+                                </div>
+                            </div>
+                        </div>
+                        <div class="instruction-step">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <div class="step-title">Copy Your API Key</div>
+                                <div class="step-desc">
+                                    A popup will show your new API key. Copy it and paste it below. You get 10,000 free requests per day!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Key Input -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="step-num">!</span>
+                        <span>Enter Your API Key</span>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                id="apiKeyInput" 
+                                class="api-input" 
+                                placeholder="AIzaSy..."
+                                autocomplete="off"
+                            />
+                            <button class="toggle-visibility" id="toggleVisibility" title="Show/Hide API Key">
+                                *
+                            </button>
+                        </div>
+                        <div class="validation-status" id="validationStatus">
+                            <div class="spinner" id="validationSpinner"></div>
+                            <span id="validationMessage"></span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" id="saveApiKey" disabled>
+                        <span>Validate & Save API Key</span>
+                    </button>
+
+                    <div class="security-note">
+                        <span class="security-icon">LOCK</span>
+                        <span class="security-text">
+                            <strong>Your API key is secure.</strong> It's stored locally in your browser's encrypted storage and is never sent to any external servers except YouTube's official API.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configured View (when API key exists) -->
+            <div class="configured-view" id="configuredView">
+                <div class="configured-card">
+                    <div class="configured-icon">OK</div>
+                    <div class="configured-title">API Key Configured</div>
+                    <div class="configured-text">
+                        Your YouTube Data API key is set up and working correctly.
+                    </div>
+                    <div class="api-key-display" id="maskedApiKey">
+                        AIzaSy••••••••••••••••••••••••••••••
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-success" id="goToPopup">
+                            Open Extension
+                        </button>
+                        <button class="btn btn-danger" id="removeApiKey">
+                            Remove Key
+                        </button>
+                    </div>
+                </div>
+
+                <div class="security-note">
+                    <span class="security-icon">INFO</span>
+                    <span class="security-text">
+                        <strong>Quota Info:</strong> YouTube Data API provides 10,000 units per day for free. Each video check uses ~1-3 units. The extension caches channel decisions to minimize API usage.
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            YouTube Content Filter v1.0 - Your data stays private
+        </div>
+
+        <script src="setup.js"></script>
+    </body>
+</html>
