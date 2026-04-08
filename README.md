@@ -27,8 +27,3 @@ A Chrome extension that blocks distracting YouTube content to help you stay focu
 - Smart channel learning (caches decisions)
 - Edit learned channels (allow/block)
 - Blocks all YouTube Shorts
-- Professional dark theme UI
-
-## License
-
-MIT
