@@ -518,8 +518,33 @@ async function applyShortsHiding() {
   }
 }
 
+// Disable YouTube video hover to play feature
+function disableHoverToPlay() {
+  const style = document.createElement("style");
+  style.id = "yt-filter-disable-hover";
+  style.textContent = `
+    /* Disable YouTube inline preview on thumbnail hover */
+    #mouseover-overlay,
+    ytd-video-preview,
+    #inline-preview-player {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+  `;
+  
+  if (!document.getElementById("yt-filter-disable-hover")) {
+    document.head.appendChild(style);
+    console.log("[YT Filter] Hover-to-play disabling CSS injected");
+  }
+}
+
 // Apply Shorts hiding on load
 applyShortsHiding();
+
+// Apply hover-to-play disabling on load
+disableHoverToPlay();
 
 // Re-apply when filter state changes
 chrome.storage.onChanged.addListener((changes, namespace) => {

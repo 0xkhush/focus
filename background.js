@@ -197,9 +197,18 @@ async function checkVideoCategory(videoId, channelId) {
 
     // STEP 3: Make API call (cache miss)
     console.log(`[YT Filter BG] Making API call for video: ${videoId}`);
-    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${API_KEY}`;
+    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${encodeURIComponent(videoId)}&key=${encodeURIComponent(API_KEY.trim())}`;
 
-    const response = await fetch(url);
+    let response;
+    try {
+      response = await fetch(url);
+    } catch (fetchError) {
+      console.error("[YT Filter BG] Network Error (Failed to fetch):", fetchError);
+      return { 
+        allowed: true, 
+        error: "Network error: Failed to fetch API. Please check your connection or ad-blocker."
+      };
+    }
     const data = await response.json();
 
     // Handle API errors
