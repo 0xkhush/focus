@@ -1,9 +1,2 @@
 # macOS
 .DS_Store
-
-# R history
-.Rhistory
-
-# Test files
-test.html
-generate-icons.html
